@@ -16,3 +16,8 @@ Stack: Node.js + TypeScript on AWS Lambda, AWS SAM (esbuild build method), Postg
   in the project root's `plan/` folder for the full policy).
 - Test with Vitest; integration tests that touch Postgres run against the local
   Docker Compose database (`backend/docker-compose.yml`).
+- SAM function resources: `Metadata` (e.g. `BuildMethod: esbuild`) must be a
+  sibling of `Type`/`Properties`, never nested inside `Properties` — this is
+  CloudFormation resource schema, not a SAM quirk. `sam build` also requires
+  `build_in_source = true` (set in `samconfig.toml`) because this is an npm
+  workspaces monorepo with unpublished internal packages (`@classes-hub/shared`).
