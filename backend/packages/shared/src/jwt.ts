@@ -14,9 +14,9 @@ function getSecret(): string {
 }
 
 export function signSessionToken(claims: SessionClaims): string {
-  return jwt.sign(claims, getSecret(), { expiresIn: '12h' });
+  return jwt.sign(claims, getSecret(), { expiresIn: '12h', algorithm: 'HS256' });
 }
 
 export function verifySessionToken(token: string): SessionClaims {
-  return jwt.verify(token, getSecret()) as SessionClaims;
+  return jwt.verify(token, getSecret(), { algorithms: ['HS256'] }) as SessionClaims;
 }
