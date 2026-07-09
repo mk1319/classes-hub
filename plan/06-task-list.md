@@ -1,20 +1,31 @@
 # Task List / Build Order
 
-Not yet generated — waiting until the design in the other files is fully detailed
-(exact API contracts, screen-by-screen UX, DB column-level detail). Once that's
-locked, this file becomes the phased build order handed to Cursor, roughly:
+The project spans independent subsystems (backend has ~10 distinct features, plus
+the dashboard, plus the Flutter app), so it's built as a sequence of phases, each
+with its own detailed implementation plan (`plan/implementation/`) written and
+executed one at a time — not one giant plan. Each phase produces working, testable
+software before the next one starts.
 
-1. DB schema + migrations
-2. `auth` feature
-3. `tenants` (super-admin) feature + branding config
-4. `users` feature (accounts, bulk import)
-5. `courses` feature (course/subject/batch/enrollment)
-6. `tests` feature (question bank, test builder, attempts, grading)
-7. `timetable` feature
-8. `notifications` feature
-9. `uploads` feature
-10. Dashboard screens (per feature, in the same order)
-11. Flutter app screens (student-facing, per feature)
+## Phase order
 
-This is a placeholder ordering — will be expanded into concrete tasks once the rest
-of the plan is finalized.
+1. **Foundation** — monorepo scaffold, SAM project skeleton, Aurora Postgres schema
+   + migrations for core tables (`tenants`, `users`, `sessions`), shared Lambda
+   utilities (DB client, JWT verify authorizer), `auth` feature (login, session
+   tracking/single-active-session enforcement per [`15-account-security-anti-fraud.md`](./15-account-security-anti-fraud.md))
+2. `tenants` feature (super-admin CRUD + branding config)
+3. `users` feature (teacher/student CRUD, bulk CSV import, session/device history endpoint)
+4. `courses` feature (course/subject/batch CRUD, teacher assignment, enrollment)
+5. `tests` feature (question bank, test builder, attempts, grading, results)
+6. `timetable` feature
+7. `notifications` feature
+8. `resources` feature
+9. `syllabus` feature (chapter list + coverage log)
+10. Dashboard scaffold (Vite + React + TanStack Router/Query + Tailwind + shadcn/ui, theme tokens, auth/login screen, app shell)
+11. Dashboard feature screens, same order as the backend phases above (2–9)
+12. Flutter app scaffold (Riverpod + go_router + Drift, theme, flavor config, auth/login screen)
+13. Flutter app feature screens: timetable, tests, resources, syllabus (read-only), notifications
+
+## Status
+
+Phase 1 is next. Its detailed implementation plan lives in
+`plan/implementation/` once written (see [`superpowers:writing-plans`](https://github.com/anthropics/claude-code) process — bite-sized TDD tasks, one plan per phase).

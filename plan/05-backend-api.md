@@ -8,7 +8,7 @@ Endpoint-level detail (request/response shapes, validation rules) still needs to
 filled in per folder below.
 
 ## `auth`
-- `POST /auth/login` — email + password → JWT
+- `POST /auth/login` — email + password → JWT (creates a session row, deactivates the user's prior sessions — see [`15-account-security-anti-fraud.md`](./15-account-security-anti-fraud.md))
 - _(refresh flow TBD)_
 
 ## `tenants` (super-admin only)
@@ -24,6 +24,7 @@ filled in per folder below.
 - `GET /users/:id`
 - `PATCH /users/:id`
 - `DELETE /users/:id`
+- `GET /users/:id/sessions` — login/device history, tutor/admin only
 
 ## `courses`
 - Course CRUD: `POST/GET/PATCH/DELETE /courses`
@@ -47,4 +48,18 @@ filled in per folder below.
 - `GET /announcements`
 
 ## `uploads`
-- `POST /uploads/presign` — get S3 presigned URL for an image upload
+- `POST /uploads/presign` — get S3 presigned URL for an image upload (test/question images)
+
+## `resources`
+- `POST /resources` — create (upload file as multipart, or provide `link_url`)
+- `GET /resources?subjectId=&batchId=` — list, scoped to what the caller can see
+- `GET /resources/:id`
+- `GET /resources/:id/file` — stream the uploaded file (`bytea`) with correct content-type; not used for link-type resources
+- `PATCH /resources/:id`
+- `DELETE /resources/:id`
+
+## `syllabus`
+- `POST/GET/PATCH/DELETE /subjects/:subjectId/chapters` — optional predefined chapter list
+- `POST/GET/PATCH/DELETE /batches/:batchId/coverage` — coverage log entries
+- Visibility toggle (`show_progress_to_students`) is updated via the existing
+  `courses` feature's `PATCH /batches/:id`, not a separate endpoint here

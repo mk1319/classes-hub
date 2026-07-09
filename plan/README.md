@@ -13,6 +13,15 @@ gets updated in place as we add detail — nothing here is final until we say so
 - [`04-future-phases.md`](./04-future-phases.md) — deferred features (attendance, fees, live classes, content, parents)
 - [`05-backend-api.md`](./05-backend-api.md) — backend feature folders, endpoints, request/response shapes (to be filled in)
 - [`06-task-list.md`](./06-task-list.md) — phased build order / task breakdown for Cursor (to be filled in once design is locked)
+- [`07-dashboard-architecture.md`](./07-dashboard-architecture.md) — dashboard folder structure, routing/data-layer conventions, per-folder CLAUDE.md plan
+- [`08-design-guidelines.md`](./08-design-guidelines.md) — dashboard visual design: typography, color, spacing, dark mode
+- [`09-agent-workflow-policy.md`](./09-agent-workflow-policy.md) — docs-stay-current rule, design-guideline verification, feature testing, before any change counts as done
+- [`10-resources-feature.md`](./10-resources-feature.md) — study materials (PDF/doc/image/video) per subject/batch, upload-to-Postgres or link-out
+- [`11-syllabus-tracking-feature.md`](./11-syllabus-tracking-feature.md) — chapter/lecture coverage tracking per batch, optional predefined chapter list, teacher-controlled student visibility
+- [`12-flutter-app-architecture.md`](./12-flutter-app-architecture.md) — Flutter folder structure, Riverpod/go_router/Drift conventions, per-folder CLAUDE.md plan
+- [`13-flutter-design-guidelines.md`](./13-flutter-design-guidelines.md) — Flutter visual design: typography, per-tenant accent color, spacing, dark mode
+- [`14-flutter-offline-performance.md`](./14-flutter-offline-performance.md) — cache-first reads, queued test-answer writes, downloadable resources, performance guidelines
+- [`15-account-security-anti-fraud.md`](./15-account-security-anti-fraud.md) — login/device session tracking, single-active-session enforcement to deter account sharing during tests
 
 ## Status
 

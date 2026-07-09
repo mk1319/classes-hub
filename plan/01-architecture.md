@@ -24,7 +24,7 @@
 
 | Layer | Choice |
 |---|---|
-| Mobile app | Flutter, per-tenant build flavors |
+| Mobile app | Flutter, per-tenant build flavors, Riverpod (state), go_router (nav), Drift (offline cache + write queue) — see [`12-flutter-app-architecture.md`](./12-flutter-app-architecture.md) |
 | Dashboard | React + Vite, TanStack Router, TanStack Query |
 | Backend runtime | Node.js + TypeScript on AWS Lambda |
 | API layer | API Gateway, one Lambda per feature folder (handles all of that feature's routes internally via a lightweight router), custom JWT Lambda authorizer |
@@ -45,7 +45,9 @@ Each is one Lambda function handling all of its own routes:
 - `tests` — question bank CRUD, test builder, test attempts, grading, results
 - `timetable` — batch schedule CRUD, recurring session generation
 - `notifications` — announcement CRUD, push dispatch via FCM
-- `uploads` — S3 presigned URL generation for image uploads
+- `uploads` — S3 presigned URL generation for image uploads (test/question images)
+- `resources` — resource metadata CRUD + file streaming (see [`10-resources-feature.md`](./10-resources-feature.md)); stores uploaded files as Postgres `bytea`, not S3
+- `syllabus` — chapter list + coverage log per batch (see [`11-syllabus-tracking-feature.md`](./11-syllabus-tracking-feature.md))
 
 ## Non-functional notes
 
