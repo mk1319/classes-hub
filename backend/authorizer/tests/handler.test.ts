@@ -43,7 +43,33 @@ describe('authorizer handler', () => {
     const token = signSessionToken({ userId: 1, tenantId: 1, role: 'teacher', sessionId });
     const result = await handler(tokenEvent(token) as any);
     expect(result.policyDocument.Statement[0].Effect).toBe('Allow');
+    expect(result.principalId).toBe('1');
+    expect(result.context?.userId).toBe('1');
+    expect(result.context?.tenantId).toBe('1');
+    expect(result.context?.role).toBe('teacher');
     expect(result.context?.sessionId).toBe(String(sessionId));
+  });
+
+  it('returns an empty string context.tenantId for a super-admin token (null tenantId)', async () => {
+    const pool = getPool();
+    const userResult = await pool.query(
+      `INSERT INTO users (tenant_id, role, email, password_hash, name)
+       VALUES (NULL, 'super_admin', 'super-admin@example.com', 'x', 'Test Super Admin') RETURNING id`
+    );
+    const sessionResult = await pool.query(
+      `INSERT INTO sessions (tenant_id, user_id, device_id, is_active) VALUES (NULL, $1, 'device-2', true) RETURNING id`,
+      [userResult.rows[0].id]
+    );
+    const superAdminSessionId = sessionResult.rows[0].id;
+
+    const token = signSessionToken({
+      userId: userResult.rows[0].id,
+      tenantId: null,
+      role: 'super_admin',
+      sessionId: superAdminSessionId,
+    });
+    const result = await handler(tokenEvent(token) as any);
+    expect(result.context?.tenantId).toBe('');
   });
 
   it('rejects a token whose session was deactivated', async () => {
