@@ -1,0 +1,14 @@
+{
+  "name": "authorizer",
+  "version": "0.0.0",
+  "private": true,
+  "dependencies": {
+    "@classes-hub/shared": "*"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.145"
+  },
+  "scripts": {
+    "test": "vitest run"
+  }
+}
