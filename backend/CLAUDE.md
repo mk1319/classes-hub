@@ -6,7 +6,8 @@ Stack: Node.js + TypeScript on AWS Lambda, AWS SAM (esbuild build method), Postg
   and future feature folders), handling all of that feature's routes internally
   via Express + `serverless-http`.
 - Shared code (DB client, JWT helpers, shared types) lives in `packages/shared`
-  and is imported as `@classes-hub/shared/*` — never duplicated per function.
+  and is imported as `@classes-hub/shared` (the package's barrel export) —
+  never duplicated per function.
 - Schema changes go in `backend/migrations/` as numbered node-pg-migrate files
   (e.g., `1_init.js`), one migration per change, run via `npm run migrate`.
 - Every query must be scoped by `tenant_id` taken from the authorizer's request
@@ -15,7 +16,9 @@ Stack: Node.js + TypeScript on AWS Lambda, AWS SAM (esbuild build method), Postg
   folder's `NOTES.md` in the same change (see `plan/09-agent-workflow-policy.md`
   in the project root's `plan/` folder for the full policy).
 - Test with Vitest; integration tests that touch Postgres run against the local
-  Docker Compose database (`backend/docker-compose.yml`).
+  Docker Compose database (`backend/docker-compose.yml`). A native local Postgres
+  instance works equally well as long as it matches the same `DATABASE_URL` —
+  Docker Compose isn't mandatory, just the default convenience path.
 - SAM function resources: `Metadata` (e.g. `BuildMethod: esbuild`) must be a
   sibling of `Type`/`Properties`, never nested inside `Properties` — this is
   CloudFormation resource schema, not a SAM quirk. `sam build` also requires
