@@ -1,0 +1,19 @@
+{
+  "name": "auth",
+  "version": "0.0.0",
+  "private": true,
+  "dependencies": {
+    "@classes-hub/shared": "*",
+    "bcryptjs": "^2.4.3",
+    "express": "^4.19.2",
+    "serverless-http": "^3.2.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/aws-lambda": "^8.10.145"
+  },
+  "scripts": {
+    "test": "vitest run"
+  }
+}
