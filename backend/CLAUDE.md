@@ -7,6 +7,8 @@ Stack: Node.js + TypeScript on AWS Lambda, AWS SAM (esbuild build method), Postg
   via Express + `serverless-http`.
 - Shared code (DB client, JWT helpers, shared types) lives in `packages/shared`
   and is imported as `@classes-hub/shared/*` — never duplicated per function.
+- Schema changes go in `backend/migrations/` as numbered node-pg-migrate files
+  (e.g., `1_init.js`), one migration per change, run via `npm run migrate`.
 - Every query must be scoped by `tenant_id` taken from the authorizer's request
   context — never trust a `tenantId` value from the request body/query string.
 - Whenever you add or change code in this folder or a subfolder, update that
