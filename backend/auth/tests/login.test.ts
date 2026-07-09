@@ -60,4 +60,25 @@ describe('login', () => {
     const sessionResult = await pool.query('SELECT is_active FROM sessions WHERE id = $1', [firstClaims.sessionId]);
     expect(sessionResult.rows[0].is_active).toBe(false);
   });
+
+  it('leaves exactly one active session after concurrent logins for the same user', async () => {
+    // Seed one pre-existing session so both concurrent logins have to race over
+    // deactivating it, exercising the transactional deactivate+insert pair
+    // (see finding: two concurrent logins previously could both deactivate-all
+    // then both insert, leaving two active sessions at once).
+    await login({ email: 'teacher@example.com', password: 'correct-password', deviceId: 'device-0' });
+
+    await Promise.all([
+      login({ email: 'teacher@example.com', password: 'correct-password', deviceId: 'device-1' }),
+      login({ email: 'teacher@example.com', password: 'correct-password', deviceId: 'device-2' }),
+    ]);
+
+    const pool = getPool();
+    const userResult = await pool.query('SELECT id FROM users WHERE email = $1', ['teacher@example.com']);
+    const activeResult = await pool.query(
+      'SELECT count(*)::int AS count FROM sessions WHERE user_id = $1 AND is_active = true',
+      [userResult.rows[0].id]
+    );
+    expect(activeResult.rows[0].count).toBe(1);
+  });
 });

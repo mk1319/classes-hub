@@ -33,28 +33,40 @@ export async function login(input: LoginInput): Promise<LoginResult> {
     throw new Error('INVALID_CREDENTIALS');
   }
 
-  await pool.query('UPDATE sessions SET is_active = false WHERE user_id = $1', [user.id]);
+  const client = await pool.connect();
+  let sessionId: number;
+  try {
+    await client.query('BEGIN');
+    await client.query('UPDATE sessions SET is_active = false WHERE user_id = $1', [user.id]);
 
-  const sessionResult = await pool.query(
-    `INSERT INTO sessions (tenant_id, user_id, device_id, device_model, os_version, app_version, ip_address, is_active)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, true)
-     RETURNING id`,
-    [
-      user.tenant_id,
-      user.id,
-      input.deviceId,
-      input.deviceModel ?? null,
-      input.osVersion ?? null,
-      input.appVersion ?? null,
-      input.ipAddress ?? null,
-    ]
-  );
+    const sessionResult = await client.query(
+      `INSERT INTO sessions (tenant_id, user_id, device_id, device_model, os_version, app_version, ip_address, is_active)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, true)
+       RETURNING id`,
+      [
+        user.tenant_id,
+        user.id,
+        input.deviceId,
+        input.deviceModel ?? null,
+        input.osVersion ?? null,
+        input.appVersion ?? null,
+        input.ipAddress ?? null,
+      ]
+    );
+    sessionId = sessionResult.rows[0].id;
+    await client.query('COMMIT');
+  } catch (err) {
+    await client.query('ROLLBACK');
+    throw err;
+  } finally {
+    client.release();
+  }
 
   const token = signSessionToken({
     userId: user.id,
     tenantId: user.tenant_id,
     role: user.role,
-    sessionId: sessionResult.rows[0].id,
+    sessionId,
   });
 
   return { token };
