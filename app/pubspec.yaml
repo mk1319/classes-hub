@@ -1,0 +1,53 @@
+name: classes_hub
+description: Classes Hub — whitelabeled student app (per-tenant build flavors).
+publish_to: "none"
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.4.0 <4.0.0"
+  flutter: ">=3.22.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  # State + navigation (mirrors the dashboard's TanStack Query / Router split).
+  flutter_riverpod: ^2.5.1
+  go_router: ^14.2.0
+  # Offline cache + write queue.
+  drift: ^2.19.0
+  sqlite3_flutter_libs: ^0.5.24
+  path_provider: ^2.1.4
+  path: ^1.9.0
+  # Networking + connectivity.
+  dio: ^5.6.0
+  connectivity_plus: ^6.0.5
+  # Device/session metadata for anti-fraud login (silent, non-biometric).
+  flutter_secure_storage: ^9.2.2
+  device_info_plus: ^10.1.2
+  package_info_plus: ^8.0.2
+  uuid: ^4.4.2
+  # Disk-cached network images (logos/thumbnails).
+  cached_network_image: ^3.4.0
+  url_launcher: ^6.3.0
+  intl: ^0.19.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+  build_runner: ^2.4.11
+  drift_dev: ^2.19.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/
+  fonts:
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Inter-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Inter-SemiBold.ttf
+          weight: 600
