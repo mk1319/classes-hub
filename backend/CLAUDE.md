@@ -10,6 +10,9 @@ Stack: Node.js + TypeScript on AWS Lambda, AWS SAM (esbuild build method), Postg
   never duplicated per function.
 - Schema changes go in `backend/migrations/` as numbered node-pg-migrate files
   (e.g., `1_init.js`), one migration per change, run via `npm run migrate`.
+  **Also update `backend/db/schema.sql` (the one-file full schema) in the same
+  change** and re-verify it matches the migrations (diff columns/indexes/
+  constraints between a DB built from each) — see `backend/db/README.md`.
 - Every query must be scoped by `tenant_id` taken from the authorizer's request
   context — never trust a `tenantId` value from the request body/query string.
 - Whenever you add or change code in this folder or a subfolder, update that
