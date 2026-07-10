@@ -4,7 +4,16 @@
   "workspaces": [
     "packages/*",
     "auth",
-    "authorizer"
+    "authorizer",
+    "tenants",
+    "users",
+    "courses",
+    "tests",
+    "timetable",
+    "notifications",
+    "uploads",
+    "resources",
+    "syllabus"
   ],
   "scripts": {
     "build": "npm run build --workspaces --if-present",
