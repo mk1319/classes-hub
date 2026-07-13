@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import type { FormEvent } from 'react';
 import { getFormDataObject } from './form-utils';
+import { cn } from '@/lib/utils';
 
 function buildFormEvent(fields: Array<{ name: string; value: string }>): FormEvent<HTMLFormElement> {
   const form = document.createElement('form');
@@ -42,5 +43,12 @@ describe('getFormDataObject', () => {
       { name: 'address.zip', value: '411001' },
     ]);
     expect(getFormDataObject(event)).toEqual({ address: { city: 'Pune', zip: '411001' } });
+  });
+});
+
+describe('@ alias resolution (regression: vitest must inherit vite.config.ts alias)', () => {
+  it('resolves `@/lib/utils` and runs `cn`', () => {
+    expect(typeof cn('a', 'b')).toBe('string');
+    expect(cn('a', 'b')).toBe('a b');
   });
 });
