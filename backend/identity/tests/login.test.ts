@@ -53,6 +53,7 @@ describe('login', () => {
     const claims = verifySessionToken(result.token);
     expect(claims.userId).toBe(userId);
     expect(claims.role).toBe('teacher');
+    expect(claims.name).toBe('Test Teacher');
   });
 
   it('rejects an incorrect password', async () => {

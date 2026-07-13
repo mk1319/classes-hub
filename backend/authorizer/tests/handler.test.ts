@@ -27,7 +27,7 @@ describe('authorizer', () => {
   });
 
   it('allows a valid token with an active session', async () => {
-    const token = signSessionToken({ userId, role: 'admin', sessionId });
+    const token = signSessionToken({ userId, role: 'admin', sessionId, name: 'Admin' });
     const result = await handler({
       authorizationToken: `Bearer ${token}`,
       methodArn: 'arn:aws:execute-api:region:account:api/*/POST/auth/logout',
@@ -46,7 +46,7 @@ describe('authorizer', () => {
   });
 
   it('rejects a token whose session has been deactivated', async () => {
-    const token = signSessionToken({ userId, role: 'admin', sessionId });
+    const token = signSessionToken({ userId, role: 'admin', sessionId, name: 'Admin' });
     await getPool().query('UPDATE sessions SET is_active = false WHERE id = $1', [sessionId]);
     await expect(
       handler({

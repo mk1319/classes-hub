@@ -4,6 +4,7 @@ export interface SessionClaims {
   userId: number;
   role: string;
   sessionId: number;
+  name: string;
 }
 
 const ALGORITHM = 'HS256';

@@ -8,11 +8,12 @@ describe('jwt', () => {
   });
 
   it('round-trips claims through sign and verify', () => {
-    const token = signSessionToken({ userId: 1, role: 'admin', sessionId: 2 });
+    const token = signSessionToken({ userId: 1, role: 'admin', sessionId: 2, name: 'Asha Admin' });
     const claims = verifySessionToken(token);
     expect(claims.userId).toBe(1);
     expect(claims.role).toBe('admin');
     expect(claims.sessionId).toBe(2);
+    expect(claims.name).toBe('Asha Admin');
   });
 
   it('rejects a token signed with a different secret', () => {

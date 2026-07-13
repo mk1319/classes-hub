@@ -76,7 +76,7 @@ export interface LoginResult {
 export async function login(input: LoginInput): Promise<LoginResult> {
   const pool = getPool();
   const userResult = await pool.query(
-    'SELECT id, role, password_hash FROM users WHERE email = $1',
+    'SELECT id, role, name, password_hash FROM users WHERE email = $1',
     [input.email]
   );
   if (userResult.rowCount === 0) {
@@ -90,7 +90,7 @@ export async function login(input: LoginInput): Promise<LoginResult> {
 
   const sessionId = await createActiveSession(pool, user.id, input);
 
-  const token = signSessionToken({ userId: user.id, role: user.role, sessionId });
+  const token = signSessionToken({ userId: user.id, role: user.role, sessionId, name: user.name });
   return { token };
 }
 
