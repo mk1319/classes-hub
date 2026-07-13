@@ -1,4 +1,0 @@
-node_modules/
-dist/
-*.local
-src/routeTree.gen.ts
