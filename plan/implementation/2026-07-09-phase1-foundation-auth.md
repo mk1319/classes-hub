@@ -1,5 +1,7 @@
 # Phase 1: Foundation + Auth Implementation Plan
 
+> **Note (single-institute update):** This doc predates the shift to a single-institute-first V1 (no multi-tenancy). References to `tenant_id`, `super_admin`, tenant/whitelabel concepts, or Aurora below describe the deferred future multi-tenant phase — see [`04-future-phases.md`](../04-future-phases.md) — not the current single-institute architecture (see [`01-architecture.md`](../01-architecture.md)).
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Stand up the backend monorepo skeleton, the Postgres schema for tenants/users/sessions, shared DB/JWT utilities, and a working `POST /auth/login` endpoint that enforces one active session per user — the foundation every other backend feature (Phases 2+) depends on.
