@@ -11,7 +11,7 @@
     "test": "npm run test --workspaces --if-present",
     "migrate": "node-pg-migrate",
     "seed": "node scripts/seed.cjs",
-    "dev": "esbuild dev-server.ts --bundle --platform=node --outfile=dev-server.cjs && node dev-server.cjs"
+    "dev": "esbuild dev-server.ts --bundle --platform=node --outfile=dev-server.cjs && node --env-file-if-exists=.env dev-server.cjs"
   },
   "devDependencies": {
     "typescript": "^5.5.4",
