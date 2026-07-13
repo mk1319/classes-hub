@@ -1,7 +1,12 @@
 import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
-import { useState, type FormEvent } from 'react';
+import { type FormEvent } from 'react';
 import { useLogin } from '@/features/auth/api';
 import { getSession } from '@/lib/auth';
+import { getFormDataObject } from '@/lib/form-utils';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export const Route = createFileRoute('/login')({
   beforeLoad: () => {
@@ -25,43 +30,36 @@ function deviceId(): string {
 function LoginPage() {
   const navigate = useNavigate();
   const login = useLogin();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
 
-  function handleSubmit(e: FormEvent) {
+  function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    const { email, password } = getFormDataObject(e) as { email: string; password: string };
     login.mutate({ email, password, deviceId: deviceId() }, { onSuccess: () => navigate({ to: '/' }) });
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-50">
-      <form onSubmit={handleSubmit} className="w-full max-w-sm rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-        <h1 className="mb-4 text-xl font-semibold text-slate-900">Classes Hub</h1>
-        <label className="mb-1 block text-sm font-medium text-slate-700">Email</label>
-        <input
-          type="email"
-          required
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="mb-3 w-full rounded border border-slate-300 px-3 py-2 text-sm"
-        />
-        <label className="mb-1 block text-sm font-medium text-slate-700">Password</label>
-        <input
-          type="password"
-          required
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="mb-4 w-full rounded border border-slate-300 px-3 py-2 text-sm"
-        />
-        {login.isError && <p className="mb-3 text-sm text-red-600">Invalid email or password.</p>}
-        <button
-          type="submit"
-          disabled={login.isPending}
-          className="w-full rounded bg-slate-900 px-3 py-2 text-sm font-medium text-white disabled:opacity-50"
-        >
-          {login.isPending ? 'Logging in…' : 'Log in'}
-        </button>
-      </form>
+    <div className="flex min-h-screen items-center justify-center bg-background">
+      <Card className="w-full max-w-sm">
+        <CardHeader>
+          <CardTitle>Classes Hub</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="email">Email</Label>
+              <Input id="email" name="email" type="email" required />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="password">Password</Label>
+              <Input id="password" name="password" type="password" required />
+            </div>
+            {login.isError && <p className="text-sm text-destructive">Invalid email or password.</p>}
+            <Button type="submit" className="w-full" disabled={login.isPending}>
+              {login.isPending ? 'Logging in…' : 'Log in'}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 }
