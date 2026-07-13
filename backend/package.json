@@ -1,0 +1,23 @@
+{
+  "name": "backend",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "authorizer",
+    "identity"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "migrate": "node-pg-migrate",
+    "seed": "node scripts/seed.cjs",
+    "dev": "esbuild dev-server.ts --bundle --platform=node --outfile=dev-server.cjs && node dev-server.cjs"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.4",
+    "vitest": "^2.0.5",
+    "node-pg-migrate": "^7.6.1",
+    "esbuild": "^0.21.5",
+    "@types/node": "^20.14.15"
+  }
+}
