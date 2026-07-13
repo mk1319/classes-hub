@@ -1,9 +1,14 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
 import { useState, type FormEvent } from 'react';
 import { useLogin } from '@/features/auth/api';
 import { getSession } from '@/lib/auth';
 
 export const Route = createFileRoute('/login')({
+  beforeLoad: () => {
+    if (getSession()) {
+      throw redirect({ to: '/' });
+    }
+  },
   component: LoginPage,
 });
 
@@ -22,10 +27,6 @@ function LoginPage() {
   const login = useLogin();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-
-  if (getSession()) {
-    navigate({ to: '/' });
-  }
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
