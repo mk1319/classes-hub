@@ -1,5 +1,31 @@
 # Future Phases (deferred, explicitly out of V1 scope)
 
+- **Multi-tenancy / Whitelabel** — turn this single-institute product into a
+  whitelabel platform sold to multiple tutors/coaching institutes, once the
+  single-institute version is validated with a real client. Deferred work
+  includes:
+  - Reintroduce a `tenants` table (id, name, branding config, flavor config).
+  - Reintroduce `tenant_id` columns across every tenant-scoped table (`users`,
+    `courses`, `questions`, `announcements`, `resources`, `sessions`, etc. — see
+    [`02-domain-model.md`](./02-domain-model.md) for the current, tenant-free
+    shape of each), and scope every query by it.
+  - Add a `super_admin` role (distinct from `admin`) that onboards new tenant
+    records and configures their branding (name/logo/colors) — a restricted
+    section of the dashboard, accessible only to the platform operator.
+  - Change email uniqueness from global-within-institute to global-across-platform,
+    and change login/tenant resolution: on login, look up the user by email,
+    resolve their `tenant_id` + `role`, and issue a JWT carrying `user_id`,
+    `tenant_id`, `role` (today's JWT carries only `user_id` + `role`).
+  - Update the custom Lambda authorizer to inject `tenant_id` into the request
+    context alongside `role` / `user_id`, and enforce tenant isolation in
+    application code (every query scoped by `tenant_id` from the verified JWT).
+  - Reintroduce per-tenant Flutter build flavors: each tutor gets their own app
+    build (name, icon, splash screen, color theme) with their `tenant_id` baked in
+    at build time, published as its own listing on the Play Store / App Store.
+  - Reintroduce a `tenants` feature/Lambda (or fold into an existing grouped
+    Lambda) exposing tenant CRUD + branding config, restricted to `super_admin`.
+  - Revisit the database choice for multi-tenant scale (e.g. Aurora Serverless v2)
+    if a single managed Postgres instance is no longer sufficient.
 - **Attendance tracking**
 - **Fee management & online payment collection**
 - **Live classes** (video provider integration)

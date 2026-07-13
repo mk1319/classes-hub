@@ -1,10 +1,7 @@
 # V1 Feature Scope — Detailed Behavior
 
-## Tenant onboarding
-Super-admin creates tenant, sets branding/flavor config.
-
 ## Accounts
-Admin/tutor creates teacher & student accounts — single entry + bulk CSV import.
+Admin creates teacher & student accounts — single entry + bulk CSV import.
 No self-registration in V1.
 
 ## Academic structure
@@ -12,8 +9,8 @@ CRUD for Course/Program → Subject → Batch; assign teachers to batches; enrol
 students per subject/batch. See [`02-domain-model.md`](./02-domain-model.md).
 
 ## Auth
-Email + password login, custom JWT (no Cognito, no OTP). Email is globally unique
-across the whole platform, used to resolve tenant + role at login.
+Email + password login, custom JWT (no Cognito, no OTP). Email is unique across
+`users`, used to resolve the user + role at login.
 
 ## Tests & Assignments
 
@@ -43,7 +40,7 @@ Push (FCM) + in-app announcements.
 ## Resources
 Study materials (PDF, document, image, video) attached at subject-level (all
 batches) or batch-level (specific batch only). Teachers add for their own
-subjects/batches, tutor/admin for anything. Added via direct upload (stored as
+subjects/batches, admin for anything. Added via direct upload (stored as
 Postgres `bytea`, not S3) or a pasted external link (e.g. Google Drive) — links are
 the preferred path for large files, especially video, to keep storage cost down.
 Full detail: [`10-resources-feature.md`](./10-resources-feature.md).
@@ -58,5 +55,5 @@ detail: [`11-syllabus-tracking-feature.md`](./11-syllabus-tracking-feature.md).
 ## Account Security / Anti-fraud
 Every login is logged as a session (device metadata, no biometrics involved); only
 one active session per student, so a second device logging in as that student
-immediately signs the real student out elsewhere. Tutor/admin can view a student's
+immediately signs the real student out elsewhere. Admin can view a student's
 login/device history. Full detail: [`15-account-security-anti-fraud.md`](./15-account-security-anti-fraud.md).

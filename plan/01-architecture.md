@@ -1,61 +1,71 @@
 # Architecture
 
-## Multi-tenancy & Whitelabel
+## Single institute
 
-- **Shared backend, isolated data.** One backend deployment (Lambda + Aurora Postgres
-  Serverless v2) serves every tutor ("tenant"). Every tenant-scoped table carries a
-  `tenant_id` column; every query is scoped by it.
-- **Tenant resolution at login is via email, not subdomain.** Email is **globally
-  unique across the entire platform** (not just per-tenant). On login, the backend
-  looks up the user by email, finds their `tenant_id` + `role`, and issues a JWT
-  carrying `user_id`, `tenant_id`, `role`. All subsequent API calls are scoped using
-  the JWT claims (verified by a custom Lambda authorizer on API Gateway).
-- **Dashboard** is a single web app on one domain, used by every tenant's
-  admins/teachers — no per-tenant subdomains needed.
-- **Flutter app is whitelabeled per tutor via build flavors.** Each tutor gets their
-  own app build (name, icon, splash screen, color theme) with their `tenant_id` baked
-  in at build time, published as their own listing on the Play Store / App Store.
-- **Super-admin panel** (a restricted section of the dashboard, accessible only to
-  Mukesh's account) creates a new tenant record, configures its branding
-  (name/logo/colors), and generates the per-tenant Flutter flavor config. Ships in
-  V1 — onboarding a single tutor is impossible without it.
+- **One backend deployment, one database.** This version serves a single institute —
+  there is no `tenant_id` anywhere in the schema and no per-tenant data isolation to
+  enforce. Every table belongs to this one institute implicitly.
+- **Login resolves the user by email directly.** Email is unique across `users`. On
+  login, the backend looks up the user by email, finds their `role`, and issues a
+  JWT carrying `user_id` + `role` (no tenant lookup involved). All subsequent API
+  calls are authorized using the JWT claims (verified by a custom Lambda authorizer
+  on API Gateway).
+- **Dashboard** is a single web app on one domain, used by this institute's
+  admins and teachers.
+- **Flutter app** is a single build for this institute (own name/icon/branding),
+  published as one listing on the Play Store / App Store — no build flavors or
+  per-tenant branding config needed yet.
+
+Multi-tenancy/whitelabel (per-tenant data isolation, `tenant_id` columns, a
+`tenants` table, a `super_admin` role, per-tenant Flutter build flavors, and tenant
+resolution at login) is explicitly deferred — see
+[`04-future-phases.md`](./04-future-phases.md). It gets added as a layer on top
+once this single-institute version is validated with a real client.
 
 ## Tech stack
 
 | Layer | Choice |
 |---|---|
-| Mobile app | Flutter, per-tenant build flavors, Riverpod (state), go_router (nav), Drift (offline cache + write queue) — see [`12-flutter-app-architecture.md`](./12-flutter-app-architecture.md) |
+| Mobile app | Flutter, Riverpod (state), go_router (nav), Drift (offline cache + write queue) — see [`12-flutter-app-architecture.md`](./12-flutter-app-architecture.md) |
 | Dashboard | React + Vite, TanStack Router, TanStack Query |
 | Backend runtime | Node.js + TypeScript on AWS Lambda |
-| API layer | API Gateway, one Lambda per feature folder (handles all of that feature's routes internally via a lightweight router), custom JWT Lambda authorizer |
+| API layer | API Gateway, a small number of grouped feature Lambdas (each handles multiple related routes internally via a lightweight router), custom JWT Lambda authorizer |
 | IaC | AWS SAM |
-| Database | Aurora Serverless v2 (PostgreSQL), multi-tenant via `tenant_id` on every tenant-scoped table |
+| Database | Plain managed PostgreSQL (e.g. RDS single instance) — no Aurora, no multi-tenant sharding |
 | File storage | S3, presigned URLs for uploads (question/solution images now; video/PDF later) |
 | Push notifications | Firebase Cloud Messaging |
-| Repo structure | Single monorepo: `/app` (Flutter), `/dashboard` (React), `/backend` (SAM + per-feature Lambda folders), `/docs` |
+| Repo structure | Single monorepo: `/app` (Flutter), `/dashboard` (React), `/backend` (SAM + grouped Lambda folders), `/docs` |
 
 ## Backend feature folders (V1)
 
-Each is one Lambda function handling all of its own routes:
+Backend routes are grouped into a small number of Lambdas rather than one per
+feature. Built so far: `authorizer` and `identity`. Planned next: `academics` and
+`content`.
 
-- `auth` — login, JWT issuance
-- `tenants` — super-admin tenant CRUD + branding config (restricted to super-admin role)
-- `users` — teacher/student account CRUD, bulk CSV import
-- `courses` — Course/Subject/Batch CRUD, teacher assignment, student enrollment
-- `tests` — question bank CRUD, test builder, test attempts, grading, results
-- `timetable` — batch schedule CRUD, recurring session generation
-- `notifications` — announcement CRUD, push dispatch via FCM
-- `uploads` — S3 presigned URL generation for image uploads (test/question images)
-- `resources` — resource metadata CRUD + file streaming (see [`10-resources-feature.md`](./10-resources-feature.md)); stores uploaded files as Postgres `bytea`, not S3
-- `syllabus` — chapter list + coverage log per batch (see [`11-syllabus-tracking-feature.md`](./11-syllabus-tracking-feature.md))
+- `authorizer` — custom JWT Lambda authorizer for API Gateway; verifies the JWT and
+  injects `user_id` / `role` into the request context
+- `identity` — `POST /auth/login`, `POST /auth/logout`, session issuance/teardown
+  (see [`15-account-security-anti-fraud.md`](./15-account-security-anti-fraud.md));
+  will also own user account CRUD (teacher/student creation, bulk CSV import)
+- `academics` (planned) — Course/Subject/Batch CRUD, teacher assignment, student
+  enrollment, timetable, tests (question bank, test builder, attempts, grading,
+  results)
+- `content` (planned) — resources (metadata + file streaming, see
+  [`10-resources-feature.md`](./10-resources-feature.md)), syllabus/chapter
+  coverage (see [`11-syllabus-tracking-feature.md`](./11-syllabus-tracking-feature.md)),
+  notifications/announcements, upload presigning
+
+This grouping may be refined as `academics` and `content` are built out, but the
+principle is: a handful of Lambdas grouped by domain area, not one Lambda per
+narrow feature.
 
 ## Non-functional notes
 
-- **Tenant isolation** is enforced in application code: every query includes
-  `tenant_id` from the verified JWT — no cross-tenant data should ever be reachable
-  through an API call.
-- **Scale**: Aurora Serverless v2 auto-scales per tenant load; a single tenant with
-  1,000+ students concentrates read/write load on batches/tests/enrollments — index
-  `tenant_id` + foreign keys accordingly.
+- **Authorization** is enforced in application code from the verified JWT's `role`
+  claim (`admin | teacher | student`) — e.g. only `admin`/`teacher` can create
+  tests, only `admin` can manage user accounts.
+- **Scale**: a single institute with 1,000+ students concentrates read/write load on
+  batches/tests/enrollments — index accordingly; no per-tenant sharding needed at
+  this scale.
 - **Security**: bcrypt for password hashing, JWT short-lived + refresh flow, S3
-  presigned URLs scoped to tenant-prefixed keys.
+  presigned URLs scoped per resource.
